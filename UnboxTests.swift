@@ -430,6 +430,38 @@ class UnboxTests: XCTestCase {
         }
     }
 
+    func testKeyPathUnboxableRawType() {
+        struct RawTypesModel: Unboxable {
+            let bool: Bool
+            let int: Int
+            let double: Double
+            let float: Float
+            let cgFloat: CGFloat
+            let string: String
+
+            init(unboxer: Unboxer) {
+                let firstKey = UnboxTestMock.requiredUnboxableDictionaryKey
+                bool = unboxer.unboxKeyPath([firstKey, "test", UnboxTestMock.requiredBoolKey])
+                int = unboxer.unboxKeyPath([firstKey, "test", UnboxTestMock.requiredIntKey])
+                double = unboxer.unboxKeyPath([firstKey, "test", UnboxTestMock.requiredDoubleKey])
+                float = unboxer.unboxKeyPath([firstKey, "test", UnboxTestMock.requiredFloatKey])
+                cgFloat = unboxer.unboxKeyPath([firstKey, "test", UnboxTestMock.requiredCGFloatKey])
+                string = unboxer.unboxKeyPath([firstKey, "test", UnboxTestMock.requiredStringKey])
+            }
+        }
+
+        let validDictionary = UnboxTestDictionaryWithAllRequiredKeysWithValidValues(false)
+        guard let model: RawTypesModel =  Unbox(validDictionary) else {
+            return XCTFail()
+        }
+        XCTAssertTrue(model.bool)
+        XCTAssertEqual(15, model.int)
+        XCTAssertEqual(1.5, model.double)
+        XCTAssertEqual(3.14, model.float)
+        XCTAssertEqual(0.72, model.cgFloat)
+        XCTAssertEqual("hello", model.string)
+    }
+
     func testAccessingNestedDictionaryWithKeyPath() {
         struct KeyPathModel: Unboxable {
             let intValue: Int

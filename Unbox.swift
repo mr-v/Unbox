@@ -341,7 +341,12 @@ public class Unboxer {
     public func unbox<T: UnboxableRawType>(key: String) -> T {
         return UnboxValueResolver<T>(self).resolveRequiredValueForKey(key, fallbackValue: T.unboxFallbackValue())
     }
-    
+
+    public func unboxKeyPath<T: UnboxableRawType>(keyPath: [String]) -> T {
+        let (extractedDictionary, key) = extractNestedDictionaryAndKeyForKeyPath(keyPath)
+        return UnboxValueResolver<T>(Unboxer(dictionary: extractedDictionary, context: context)).resolveRequiredValueForKey(key, fallbackValue: T.unboxFallbackValue())
+    }
+
     /// Unbox an optional raw type
     public func unbox<T: UnboxableRawType>(key: String) -> T? {
         return UnboxValueResolver<T>(self).resolveOptionalValueForKey(key)
@@ -510,7 +515,7 @@ public class Unboxer {
             return formatter.formatUnboxedValue($0)
         })
     }
-    
+
     /// Make this Unboxer fail for a certain key. This will cause the `Unbox()` function that triggered this Unboxer to return `nil`.
     public func failForKey(key: String) {
         self.failForInvalidValue(nil, forKey: key)
@@ -519,6 +524,29 @@ public class Unboxer {
     /// Make this Unboxer fail for a certain key and invalid value. This will cause the `Unbox()` function that triggered this Unboxer to return `nil`.
     public func failForInvalidValue(invalidValue: Any?, forKey key: String) {
         self.failureInfo = (key, invalidValue)
+    }
+
+    private func extractNestedDictionaryAndKeyForKeyPath(keyPath: [String]) -> (UnboxableDictionary, key: String) {
+        guard let firstKey = keyPath.first, let lastKey = keyPath.last else {
+            failForKey("")
+            return ([:], key: "")
+        }
+
+        let unboxedDictionary: UnboxableDictionary = unbox(firstKey)
+        var nestedDictionary: UnboxableDictionary? = unboxedDictionary
+        for key in keyPath.dropFirst().dropLast() {
+            nestedDictionary = nestedDictionary?[key] as? UnboxableDictionary
+            if nestedDictionary == nil {
+                break
+            }
+        }
+
+        guard let dictionary = nestedDictionary else {
+            failForKey(keyPath.joinWithSeparator(", "))
+            return ([:], key: lastKey)
+        }
+
+        return (dictionary, key: lastKey)
     }
 }
 
