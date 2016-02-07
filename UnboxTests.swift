@@ -430,7 +430,7 @@ class UnboxTests: XCTestCase {
         }
     }
 
-    func testKeyPathUnboxableRawType() {
+    func test_UnboxingUnboxableRawTypeWithTrueKeyPathParamater() {
         struct RawTypesModel: Unboxable {
             let bool: Bool
             let int: Int
@@ -441,12 +441,12 @@ class UnboxTests: XCTestCase {
 
             init(unboxer: Unboxer) {
                 let firstKey = UnboxTestMock.requiredUnboxableDictionaryKey
-                bool = unboxer.unboxKeyPath([firstKey, "test", UnboxTestMock.requiredBoolKey])
-                int = unboxer.unboxKeyPath([firstKey, "test", UnboxTestMock.requiredIntKey])
-                double = unboxer.unboxKeyPath([firstKey, "test", UnboxTestMock.requiredDoubleKey])
-                float = unboxer.unboxKeyPath([firstKey, "test", UnboxTestMock.requiredFloatKey])
-                cgFloat = unboxer.unboxKeyPath([firstKey, "test", UnboxTestMock.requiredCGFloatKey])
-                string = unboxer.unboxKeyPath([firstKey, "test", UnboxTestMock.requiredStringKey])
+                bool = unboxer.unbox([firstKey, "test", UnboxTestMock.requiredBoolKey].joinWithSeparator("."), isKeyPath: true)
+                int = unboxer.unbox([firstKey, "test", UnboxTestMock.requiredIntKey].joinWithSeparator("."), isKeyPath: true)
+                double = unboxer.unbox([firstKey, "test", UnboxTestMock.requiredDoubleKey].joinWithSeparator("."), isKeyPath: true)
+                float = unboxer.unbox([firstKey, "test", UnboxTestMock.requiredFloatKey].joinWithSeparator("."), isKeyPath: true)
+                cgFloat = unboxer.unbox([firstKey, "test", UnboxTestMock.requiredCGFloatKey].joinWithSeparator("."), isKeyPath: true)
+                string = unboxer.unbox([firstKey, "test", UnboxTestMock.requiredStringKey].joinWithSeparator("."), isKeyPath: true)
             }
         }
 
